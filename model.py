@@ -88,7 +88,7 @@ class PositionwiseFeedForward(nn.Module):
     def forward(self, x):
         residual = x
 
-        x = self.w_2(F.relu(self.w_1(x)))
+        x = self.w_2(F.leaky_relu(self.w_1(x)))
         x = self.dropout(x)
         x += residual
 
@@ -204,14 +204,13 @@ class CleanUNet(L.LightningModule):
         for i in range(encoder_n_layers):
             self.encoder.append(nn.Sequential(
                 nn.Conv1d(channels_input, channels_H, kernel_size, stride),
-                nn.ReLU(),
+                nn.LeakyReLU(),
                 nn.Conv1d(channels_H, channels_H * 2, 1),
                 nn.GLU(dim=1)
             ))
             channels_input = channels_H
 
             if i == 0:
-                # no relu at end
                 self.decoder.append(nn.Sequential(
                     nn.Conv1d(channels_H * 2, channels_H * 2, 1),
                     nn.GLU(dim=1),
@@ -222,7 +221,7 @@ class CleanUNet(L.LightningModule):
                     nn.Conv1d(channels_H * 2, channels_H * 2, 1),
                     nn.GLU(dim=1),
                     nn.ConvTranspose1d(channels_H, channels_output, kernel_size, stride),
-                    nn.ReLU()
+                    nn.LeakyReLU()
                 ))
             channels_output = channels_H
 
