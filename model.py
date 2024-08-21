@@ -213,13 +213,13 @@ class CleanUNet(L.LightningModule):
             if i == 0:
                 # no relu at end
                 self.decoder.append(nn.Sequential(
-                    nn.Conv1d(channels_H, channels_H * 2, 1),
+                    nn.Conv1d(channels_H * 2, channels_H * 2, 1),
                     nn.GLU(dim=1),
                     nn.ConvTranspose1d(channels_H, channels_output, kernel_size, stride)
                 ))
             else:
                 self.decoder.insert(0, nn.Sequential(
-                    nn.Conv1d(channels_H, channels_H * 2, 1),
+                    nn.Conv1d(channels_H * 2, channels_H * 2, 1),
                     nn.GLU(dim=1),
                     nn.ConvTranspose1d(channels_H, channels_output, kernel_size, stride),
                     nn.ReLU()
@@ -274,7 +274,7 @@ class CleanUNet(L.LightningModule):
 
         for i, upsampling_block in enumerate(self.decoder):
             skip_i = skip_connections[i]
-            x = torch.cat((x, skip_i), dim=2)
+            x = torch.cat((x, skip_i), dim=1)
             x = upsampling_block(x)
 
         # x = x * std
