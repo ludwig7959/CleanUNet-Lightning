@@ -1,0 +1,8 @@
+audioread==3.0.1
+librosa==0.10.2.post1
+numpy==1.26.4
+soundfile==0.12.1
+soxr==0.3.7
+tensorboard==2.16.2
+torch==2.4.0
+lightning==2.4.0

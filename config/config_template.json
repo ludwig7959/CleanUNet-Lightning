@@ -1,0 +1,45 @@
+{
+  "common": {
+    "signal_length": 64000,
+    "sampling_rate": 16000
+  },
+  "preprocess": {
+    "clean_audio_path": "clean_raw",
+    "noise_audio_path": "noise_raw",
+    "output_noisy_path": "input",
+    "output_clean_path": "target",
+    "target_rms": 0.1
+  },
+  "train": {
+    "accelerator": "gpu",
+    "checkpoint": null,
+    "epochs": 10000,
+    "batch_size": 8,
+    "input_audio_path": "input",
+    "target_audio_path": "target",
+    "validation": {
+      "enabled": true,
+      "input_audio_path": "v_input",
+      "target_audio_path": "v_target"
+    },
+    "early_stopping": {
+      "enabled": true,
+      "monitor": "val_loss",
+      "patience": 5
+    },
+    "optimizer": {
+      "learning_rate": 2e-4
+    },
+    "loss": {
+      "reconstruction": "mse_loss",
+      "stft": {
+        "sc_lambda": 0.5,
+        "mag_lambda": 0.5,
+        "window": "hamming_window",
+        "hop_lengths": [50, 120, 240],
+        "win_lengths": [512, 1024, 2048],
+        "n_ffts": [512, 1024, 2048]
+      }
+    }
+  }
+}
