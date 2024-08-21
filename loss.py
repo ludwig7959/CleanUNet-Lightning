@@ -37,12 +37,17 @@ class STFTLoss(torch.nn.Module):
         self.register_buffer("window", getattr(torch, window)(win_length))
 
     def _magnitude(self, x):
-        x_stft = torch.stft(x, self.n_fft, self.hop_length, window=self.window.to(x.device), return_complex=False)
+        x_stft = torch.stft(
+            x,
+            self.n_fft,
+            self.hop_length,
+            window=self.window.to(x.device),
+            return_complex=True
+        )
+        magnitude_squared = torch.clamp(x_stft.real**2 + x_stft.imag**2, min=1e-7)
+        magnitude = torch.sqrt(magnitude_squared)
 
-        real = x_stft[..., 0]
-        imag = x_stft[..., 1]
-
-        return torch.sqrt(torch.clamp(real**2 + imag**2, min=1e-7)).transpose(2, 1)
+        return magnitude.transpose(2, 1)
 
     def forward(self, y_pred, y_true):
         magnitude_pred = self._magnitude(y_pred)

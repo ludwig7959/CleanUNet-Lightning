@@ -33,16 +33,9 @@ if __name__ == '__main__':
                                        patience=config_train['early_stopping']['patience'],
                                        ))
 
-    if config_train['accelerator'] == 'gpu':
-        trainer = Trainer(max_epochs=config_train['epochs'],
-                          accelerator=config_train['accelerator'],
-                          gpus=-1,
-                          callbacks=callbacks
-                          )
-    else:
-        trainer = Trainer(max_epochs=config_train['epochs'],
-                          accelerator=config_train['accelerator'],
-                          callbacks=callbacks
-                          )
+    trainer = Trainer(max_epochs=config_train['epochs'],
+                      accelerator=config_train['accelerator'],
+                      callbacks=callbacks
+                      )
 
     trainer.fit(model, datamodule=WaveformDataModule())

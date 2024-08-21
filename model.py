@@ -1,3 +1,5 @@
+from typing import Any
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -251,8 +253,8 @@ class CleanUNet(L.LightningModule):
         B, C, L = noisy_audio.shape
         assert C == 1
 
-        std = noisy_audio.std(dim=2, keepdim=True) + 1e-3
-        noisy_audio /= std
+        # std = noisy_audio.std(dim=2, keepdim=True) + 1e-3
+        # noisy_audio /= std
         x = noisy_audio
 
         skip_connections = []
@@ -275,7 +277,7 @@ class CleanUNet(L.LightningModule):
             x = x + skip_i[:, :, :x.shape[-1]]
             x = upsampling_block(x)
 
-        x = x * std
+        # x = x * std
         return x
 
     def configure_optimizers(self):
@@ -308,4 +310,4 @@ class CleanUNet(L.LightningModule):
         sc_loss, mag_loss = loss.mrstft_loss(output.squeeze(1), clean_audio.squeeze(1))
 
         self.log('val_rec_loss', rec_loss, on_epoch=True, on_step=False, prog_bar=True)
-        self.log('val_loss', sc_loss + mag_loss, on_epoch=True, on_step=False, prog_bar=True)
+        self.log('val_loss', rec_loss + sc_loss + mag_loss, on_epoch=True, on_step=False, prog_bar=True)

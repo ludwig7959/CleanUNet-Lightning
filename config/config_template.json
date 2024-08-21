@@ -41,5 +41,10 @@
         "n_ffts": [512, 1024, 2048]
       }
     }
+  },
+  "denoise": {
+    "model_path": "checkpoints/best-checkpoint-v1.ckpt",
+    "noisy_audio_path": "noisy",
+    "output_audio_path": "output"
   }
 }

@@ -73,11 +73,20 @@ class WaveformDataModule(L.LightningDataModule):
                                                  config['train']['validation']['target_audio_path'])
 
     def train_dataloader(self):
-        return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
+        return DataLoader(self.train_dataset,
+                          batch_size=self.batch_size,
+                          shuffle=True,
+                          num_workers=8,
+                          persistent_workers=True
+                          )
 
     def val_dataloader(self):
         if self.use_validation:
-            return DataLoader(self.val_dataset, batch_size=self.batch_size * 2)
+            return DataLoader(self.val_dataset,
+                              batch_size=self.batch_size * 2,
+                              num_workers=8,
+                              persistent_workers=True
+                              )
         return None
 
     def test_dataloader(self):
