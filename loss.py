@@ -107,5 +107,7 @@ mrstft_loss = MultiResolutionSTFTLoss(
     config['stft']['n_ffts'],
     config['stft']['hop_lengths'],
     config['stft']['win_lengths'],
-    config['stft']['window']
+    config['stft']['window'],
+    config['stft']['sc_lambda'],
+    config['stft']['mag_lambda']
 )
