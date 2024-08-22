@@ -1,5 +1,6 @@
 import json
 import os
+import random
 
 import librosa
 import numpy as np
@@ -12,6 +13,11 @@ def common_preprocess(audio, orig_sr, target_sr, target_rms=0.1):
     audio_normalized = rms_normalize(audio_resampled, target_rms)
 
     return audio_normalized
+
+
+def calculate_noise_rms(base_rms, snr):
+    rms_noise = base_rms * 10 ** (-snr / 20)
+    return rms_noise
 
 
 def rms_normalize(y, target_rms):
@@ -49,7 +55,7 @@ if __name__ == '__main__':
     # target_samples = int(TIME_DOMAIN_SIZE * HOP_LENGTH - HOP_LENGTH + 2)
     target_samples = config_common['signal_length']
     target_sr = config_common['sampling_rate']
-    target_rms = config_preprocess['target_rms']
+    base_rms = config_common['base_rms']
 
     clean_audios = []
     for audio_file_name in os.listdir(clean_audio_path):
@@ -57,7 +63,7 @@ if __name__ == '__main__':
             continue
 
         audio, sr = librosa.load(os.path.join(clean_audio_path, audio_file_name), sr=None, mono=True)
-        preprocessed = common_preprocess(audio, sr, target_sr, target_rms)
+        preprocessed = common_preprocess(audio, sr, target_sr, base_rms)
 
         end = min(target_samples, preprocessed.shape[0])
         cut_waveform = preprocessed[:end]
@@ -73,7 +79,7 @@ if __name__ == '__main__':
             continue
 
         audio, sr = librosa.load(os.path.join(noise_audio_path, audio_file_name), sr=None, mono=True)
-        preprocessed = common_preprocess(audio, sr, target_sr, target_rms)
+        preprocessed = common_preprocess(audio, sr, target_sr, base_rms)
         audio_length = len(preprocessed)
 
         n = int(audio_length / target_samples)
@@ -93,21 +99,26 @@ if __name__ == '__main__':
     print('Number of noise audios: ', len(noise_audios))
 
     index = 0
-    if len(clean_audios) > len(noise_audios):
-        for i in range(len(clean_audios)):
-            synthesized = clean_audios[i] + noise_audios[i % len(noise_audios)]
-            sf.write(os.path.join(output_noisy_path, f'audio-{index + 1}.wav'), synthesized,
-                     samplerate=target_sr)
-            sf.write(os.path.join(output_clean_path, f'audio-{index + 1}.wav'), clean_audios[i],
-                     samplerate=target_sr)
+    for snr in config_preprocess['signal_to_noise_ratios']:
+        random.shuffle(clean_audios)
+        target_rms = calculate_noise_rms(base_rms, snr)
+        if len(clean_audios) > len(noise_audios):
+            for i in range(len(clean_audios)):
+                noise = rms_normalize(noise_audios[i % len(noise_audios)], target_rms)
+                synthesized = clean_audios[i] + noise
+                sf.write(os.path.join(output_noisy_path, f'audio-{index + 1}.wav'), synthesized,
+                         samplerate=target_sr)
+                sf.write(os.path.join(output_clean_path, f'audio-{index + 1}.wav'), clean_audios[i],
+                         samplerate=target_sr)
 
-            index += 1
-    else:
-        for i in range(len(noise_audios)):
-            synthesized = clean_audios[i % len(clean_audios)] + noise_audios[i]
-            sf.write(os.path.join(output_noisy_path, f'audio-{index + 1}.wav'), synthesized,
-                     samplerate=target_sr)
-            sf.write(os.path.join(output_clean_path, f'audio-{index + 1}.wav'),
-                     clean_audios[i % len(clean_audios)], samplerate=target_sr)
+                index += 1
+        else:
+            for i in range(len(noise_audios)):
+                noise = rms_normalize(noise_audios[i], target_rms)
+                synthesized = clean_audios[i % len(clean_audios)] + noise
+                sf.write(os.path.join(output_noisy_path, f'audio-{index + 1}.wav'), synthesized,
+                         samplerate=target_sr)
+                sf.write(os.path.join(output_clean_path, f'audio-{index + 1}.wav'),
+                         clean_audios[i % len(clean_audios)], samplerate=target_sr)
 
-            index += 1
+                index += 1

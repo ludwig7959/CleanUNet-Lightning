@@ -28,7 +28,7 @@ if __name__ == '__main__':
             continue
 
         audio, sr = librosa.load(os.path.join(config_denoise['noisy_audio_path'], file), sr=None)
-        preprocessed = torch.tensor(common_preprocess(audio, sr, config_common['sampling_rate'])).unsqueeze(0)
+        preprocessed = torch.tensor(common_preprocess(audio, sr, config_common['sampling_rate'], config_common['base_rms'])).unsqueeze(0)
         audio_length = preprocessed.size(1)
 
         slice_length = config_common['signal_length']

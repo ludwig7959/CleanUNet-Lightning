@@ -172,7 +172,7 @@ class TransformerEncoder(nn.Module):
 
 class CleanUNet(L.LightningModule):
     def __init__(self, channels_input=1, channels_output=1,
-                 channels_H=64, max_H=768,
+                 channels_H=32, max_H=768,
                  encoder_n_layers=8, kernel_size=2, stride=2,
                  tsfm_n_layers=5,
                  tsfm_n_head=8,

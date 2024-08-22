@@ -1,14 +1,15 @@
 {
   "common": {
     "signal_length": 64000,
-    "sampling_rate": 16000
+    "sampling_rate": 16000,
+    "base_rms": 0.1
   },
   "preprocess": {
     "clean_audio_path": "clean_raw",
     "noise_audio_path": "noise_raw",
     "output_noisy_path": "input",
     "output_clean_path": "target",
-    "target_rms": 0.1
+    "signal_to_noise_ratios": [ 20, 15, 10, 5, 0, -5 ]
   },
   "train": {
     "accelerator": "gpu",
